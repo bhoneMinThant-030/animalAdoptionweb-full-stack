@@ -1,0 +1,112 @@
+/* =========================================
+   modal-form.css (shared for Add + Edit)
+   Depends on your existing variables + .btn + .card + .field__control
+   ========================================= */
+
+.modal{
+  padding: 0;
+  border: 0;
+  background: transparent;
+  width: min(720px, 92vw);
+}
+
+.modal::backdrop{
+  background: rgba(15, 23, 42, .35);
+  backdrop-filter: blur(2px);
+}
+
+.modal__panel{
+  padding: 0; /* card already has background/border/radius from your main CSS */
+}
+
+/* Header */
+.modal__header{
+  padding: 22px 22px 14px;
+  border-bottom: 1px solid rgba(229,231,235,.9);
+}
+
+.modal__headerRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.modal__title{
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.3px;
+}
+
+.modal__subtitle{
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.modal__close{
+  height: 44px;
+  width: 44px;
+  padding: 0;
+  border-radius: 14px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* Body */
+.modal__body{
+  padding: 22px;
+}
+
+/* Grid */
+.modal__grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.modal__full{
+  grid-column: 1 / -1;
+}
+
+.modal__label{
+  display:block;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 800;
+  letter-spacing: .06em;
+  margin: 0 0 8px;
+}
+
+.modal__textarea{
+  height: auto;
+  padding: 14px 16px;
+}
+
+.modal__file{
+  padding-top: 14px; /* helps file input look nicer */
+}
+
+.modal__hint{
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Actions */
+.modal__actions{
+  display:flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.modal__actions .btn{
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 620px){
+  .modal__grid{
+    grid-template-columns: 1fr;
+  }
+}

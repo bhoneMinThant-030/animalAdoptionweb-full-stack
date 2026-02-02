@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdoptHub • Animal Details</title>
+
+  <script src="./js/animals.js" defer></script>
+  <link rel="stylesheet" href="css/modal-form.css" />
+  <link rel="stylesheet" href="css/animal_detail.css" />
+  
+</head>
+
+<body class="page-detail">
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="animals.html">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__name">AdoptHub</span>
+      </a>
+
+      <nav class="nav__links" aria-label="Primary">
+        <a class="nav__link is-active" href="animals.html">All Animals</a>
+        <a class="nav__link" href="add_animal.html">Add Animal</a>
+        <a class="nav__link" href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <p class="meta detail-breadcrumb">
+        <a href="animals.html">All Animals</a> &nbsp;›&nbsp;
+        <a id="crumbSpeciesLink" href="animals.html"></a> &nbsp;›&nbsp;
+        <span id="crumbName"></span>
+      </p>
+
+      <!-- Header card -->
+      <div class="filter-card detail-header">
+        <div class="detail-header__row">
+          <div>
+            <h1 id="detailName" class="hero__title detail-title"></h1>
+            <p id="detailSubtitle" class="detail-subtitle"></p>
+          </div>
+
+          <span id="detailStatusPill" class="badge" style="position:static; display:inline-block;"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+    <div class="container">
+      <div class="detail-layout">
+
+        <!-- LEFT COLUMN -->
+        <div class="detail-left">
+          <article class="card">
+            <div class="card__media detail-media">
+              <img id="detailImage" src="" alt="" />
+              <span id="detailStatusBadge" class="badge"></span>
+            </div>
+          </article>
+
+          <article class="card detail-personality">
+            <div class="card__body">
+              <h2 class="detail-section-title">Personality &amp; Temperament</h2>
+              <p id="detailTemperament" class="detail-temperament"></p>
+            </div>
+          </article>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <aside class="detail-right">
+          <article class="card detail-quick">
+            <div class="card__body">
+              <h2 class="detail-section-title">Quick Info</h2>
+
+              <div class="info-list">
+
+                <div class="info-row">
+                  <span class="brand__mark info-icon"></span>
+                  <div>
+                    <div class="info-label">AGE</div>
+                    <div id="quickAge" class="info-value"></div>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="brand__mark info-icon"></span>
+                  <div>
+                    <div class="info-label">SPECIES</div>
+                    <div id="quickSpecies" class="info-value"></div>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="brand__mark info-icon"></span>
+                  <div>
+                    <div class="info-label">BREED</div>
+                    <div id="quickBreed" class="info-value"></div>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="brand__mark info-icon"></span>
+                  <div>
+                    <div class="info-label">GENDER</div>
+                    <div id="quickGender" class="info-value"></div>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <span class="brand__mark info-icon"></span>
+                  <div>
+                    <div class="info-label">STATUS</div>
+                    <div id="quickStatus" class="info-value"></div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="detail-actions">
+                <a id="editLink" onclick="openEditAnimalDialog(this)" class="btn btn--ghost btn--pill">Edit</a>
+                <a href="animals.html" class="btn btn--ghost btn--pill">← Back</a>
+              </div>
+
+            </div>
+          </article>
+        </aside>
+
+      </div>
+    </div>
+    <dialog id="editAnimalDialog" class="modal">
+      <div class="modal__panel card">
+        <!-- Header -->
+        <div class="modal__header">
+          <div class="modal__headerRow">
+            <div>
+              <h2 class="modal__title">Edit Animal</h2>
+              <p class="modal__subtitle">Update the details below.</p>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn--ghost modal__close"
+              onclick="document.getElementById('editAnimalDialog').close()"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <form
+          id="editAnimalForm"
+          class="modal__body"
+          enctype="multipart/form-data"
+          onsubmit="submitEditAnimal(event)"
+        >
+          <input type="hidden" name="animal_id" id="edit_animal_id" />
+
+          <div class="modal__grid">
+            <!-- Name -->
+            <div class="modal__full">
+              <label class="modal__label">ANIMAL NAME</label>
+              <input name="name" id="edit_name" class="field__control" required />
+            </div>
+
+            <!-- Species -->
+            <div>
+              <label class="modal__label">SPECIES</label>
+              <input name="species" id="edit_species" class="field__control" required />
+            </div>
+
+            <!-- Breed -->
+            <div>
+              <label class="modal__label">BREED</label>
+              <input name="breed" id="edit_breed" class="field__control" required />
+            </div>
+
+            <!-- Gender -->
+            <div>
+              <label class="modal__label">GENDER</label>
+              <select name="gender" id="edit_gender" class="field__control">
+                <option value="Unknown">Unknown</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <!-- Age -->
+            <div>
+              <label class="modal__label">AGE (MONTHS)</label>
+              <input
+                name="age_months"
+                id="edit_age_months"
+                type="number"
+                min="0"
+                class="field__control"
+                required
+              />
+            </div>
+
+            <!-- Status -->
+            <div class="modal__full">
+              <label class="modal__label">ADOPTION STATUS</label>
+              <select name="status" id="edit_status" class="field__control" required>
+                <option value="Available">Available</option>
+                <option value="Reserved">Reserved</option>
+                <option value="Adopted">Adopted</option>
+              </select>
+            </div>
+
+            <!-- File -->
+            <div class="modal__full">
+              <label class="modal__label">NEW IMAGE (OPTIONAL)</label>
+              <input
+                name="image"
+                id="edit_image"
+                type="file"
+                accept="image/*"
+                class="field__control modal__file"
+              />
+              <div class="modal__hint">Leave empty to keep the current image.</div>
+            </div>
+
+            <!-- Temperament -->
+            <div class="modal__full">
+              <label class="modal__label">PERSONALITY / TEMPERAMENT</label>
+              <textarea
+                name="temperament"
+                id="edit_temperament"
+                class="field__control modal__textarea"
+                rows="4"
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="modal__actions">
+            <button
+              type="button"
+              class="btn btn--ghost btn--pill"
+              onclick="document.getElementById('editAnimalDialog').close()"
+            >
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn--primary btn--pill">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <small>© AdoptHub • Animal Adoption Portal</small>
+    </div>
+  </footer>
+</body>
+</html>

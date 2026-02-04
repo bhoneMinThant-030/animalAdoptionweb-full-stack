@@ -5,6 +5,27 @@ var path = require("path");
 var multer = require("multer");
 var { requireAdmin } = require("../middleware/auth");
 
+function httpError(statusCode, message) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
+
+function parsePositiveInt(value) {
+  const n = Number(value);
+  if (!Number.isInteger(n) || n <= 0) return null;
+  return n;
+}
+
+function cleanText(v) {
+  return typeof v === "string" ? v.trim() : "";
+}
+
+function validateEnum(value, allowed) {
+  return allowed.includes(value);
+}
+
+// Multer storage
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "..", "public", "images"));
@@ -24,18 +45,11 @@ var upload = multer({
   },
 });
 
-
-/**
- * NEW animals schema fields:
- * animal_id, name, species, breed, gender, age_months, temperament, status, image_url, created_at, updated_at
- */
-
-// GET /api/animals  (list all animals)
-router.get("/", function (req, res) {
+// GET /api/animals
+router.get("/", function (req, res, next) {
   var sql = `
     SELECT
-      animal_id, name,
-      species, breed,
+      animal_id, name, species, breed,
       gender, age_months, temperament, status,
       image_url, created_at, updated_at
     FROM animals
@@ -43,74 +57,123 @@ router.get("/", function (req, res) {
   `;
 
   db.query(sql, function (error, result) {
-    if (error) {
-      console.log("DB ERROR (GET /api/animals):", error);
-      return res.status(500).json({ error: error.message });
-    }
+    if (error) return next(error);
     res.json(result);
   });
 });
 
-// GET /api/animals/:id (details)
-router.get("/:id", function (req, res) {
+// GET /api/animals/:id
+router.get("/:id", function (req, res, next) {
+  const id = parsePositiveInt(req.params.id);
+  if (!id) return next(httpError(400, "Invalid animal id"));
+
   var sql = `
     SELECT
-      animal_id, name,
-      species, breed,
+      animal_id, name, species, breed,
       gender, age_months, temperament, status,
       image_url, created_at, updated_at
     FROM animals
     WHERE animal_id = ?
   `;
 
-  db.query(sql, [req.params.id], function (error, result) {
-    if (error) {
-      console.log("DB ERROR (GET /api/animals/:id):", error);
-      return res.status(500).json({ error: error.message });
+  db.query(sql, [id], function (error, result) {
+    if (error) return next(error);
+
+    if (!result || result.length === 0) {
+      return next(httpError(404, "Animal not found"));
     }
 
-    // Keep same response shape as before (your old code returns an array)
+    // Keep your existing frontend compatibility (array)
     res.json(result);
   });
 });
 
-// POST /api/animals (create)
-router.post("/", requireAdmin, upload.single("image"), function (req, res) {
-  // Build image_url from uploaded file
-  var image_url = req.file ? "/images/" + req.file.filename : null;
+// POST /api/animals (admin only)
+router.post("/", requireAdmin, upload.single("image"), function (req, res, next) {
+  const name = cleanText(req.body.name);
+  const species = cleanText(req.body.species);
+  const breed = cleanText(req.body.breed);
+  const temperament = cleanText(req.body.temperament);
+
+  const gender = req.body.gender;
+  const status = req.body.status;
+  const age_months = Number(req.body.age_months);
+
+  if (!name) return next(httpError(400, "Name is required"));
+  if (!species) return next(httpError(400, "Species is required"));
+  if (!breed) return next(httpError(400, "Breed is required"));
+  if (!temperament) return next(httpError(400, "Temperament is required"));
+
+  if (!Number.isInteger(age_months) || age_months < 0) {
+    return next(httpError(400, "age_months must be an integer >= 0"));
+  }
+
+  if (!validateEnum(gender, ["Male", "Female", "Unknown"])) {
+    return next(httpError(400, "Invalid gender"));
+  }
+
+  if (!validateEnum(status, ["Available", "Reserved", "Adopted"])) {
+    return next(httpError(400, "Invalid status"));
+  }
+
+  if (!req.file) return next(httpError(400, "Image is required"));
+
+  var image_url = "/images/" + req.file.filename;
 
   var sql = `
     INSERT INTO animals
-      (name,species,breed, gender, age_months, temperament, status, image_url)
+      (name, species, breed, gender, age_months, temperament, status, image_url)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   var parameter = [
-    req.body.name,
-    req.body.species,
-    req.body.breed,
-    req.body.gender,
-    req.body.age_months,
-    req.body.temperament,
-    req.body.status,
+    name,
+    species,
+    breed,
+    gender,
+    age_months,
+    temperament,
+    status,
     image_url,
   ];
 
   db.query(sql, parameter, function (error, result) {
-    if (error) {
-      console.log("DB ERROR (POST /api/animals):", error);
-      return res.status(500).json({ error: error.message });
-    }
+    if (error) return next(error);
     res.json(result);
   });
 });
 
+// PUT /api/animals/:id (admin only)
+router.put("/:id", requireAdmin, upload.single("image"), function (req, res, next) {
+  const id = parsePositiveInt(req.params.id);
+  if (!id) return next(httpError(400, "Invalid animal id"));
 
-// PUT /api/animals/:id (update)
-router.put("/:id", requireAdmin, upload.single("image"), function (req, res) {
-  const animalId = req.params.id;
+  const name = cleanText(req.body.name);
+  const species = cleanText(req.body.species);
+  const breed = cleanText(req.body.breed);
+  const temperament = cleanText(req.body.temperament);
 
-  // if multer received a file, build the public path
+  const gender = req.body.gender;
+  const status = req.body.status;
+  const age_months = Number(req.body.age_months);
+
+  if (!name) return next(httpError(400, "Name is required"));
+  if (!species) return next(httpError(400, "Species is required"));
+  if (!breed) return next(httpError(400, "Breed is required"));
+  if (!temperament) return next(httpError(400, "Temperament is required"));
+
+  if (!Number.isInteger(age_months) || age_months < 0) {
+    return next(httpError(400, "age_months must be an integer >= 0"));
+  }
+
+  if (!validateEnum(gender, ["Male", "Female", "Unknown"])) {
+    return next(httpError(400, "Invalid gender"));
+  }
+
+  if (!validateEnum(status, ["Available", "Reserved", "Adopted"])) {
+    return next(httpError(400, "Invalid status"));
+  }
+
   const newImageUrl = req.file ? `/images/${req.file.filename}` : null;
 
   const sql = `
@@ -128,35 +191,42 @@ router.put("/:id", requireAdmin, upload.single("image"), function (req, res) {
   `;
 
   const parameter = [
-    req.body.name,
-    req.body.species,
-    req.body.breed,
-    req.body.gender,
-    req.body.age_months,
-    req.body.temperament,
-    req.body.status,
-    newImageUrl,   // null => keep old
-    animalId,
+    name,
+    species,
+    breed,
+    gender,
+    age_months,
+    temperament,
+    status,
+    newImageUrl,
+    id,
   ];
 
   db.query(sql, parameter, function (error, result) {
-    if (error) {
-      console.log("DB ERROR (PUT /api/animals/:id):", error);
-      return res.status(500).json({ error: error.message });
+    if (error) return next(error);
+
+    if (!result || result.affectedRows === 0) {
+      return next(httpError(404, "Animal not found"));
     }
+
     res.json(result);
   });
 });
 
-// DELETE /api/animals/:id
-router.delete("/:id", requireAdmin, function (req, res) {
+// DELETE /api/animals/:id (admin only)
+router.delete("/:id", requireAdmin, function (req, res, next) {
+  const id = parsePositiveInt(req.params.id);
+  if (!id) return next(httpError(400, "Invalid animal id"));
+
   var sql = "DELETE FROM animals WHERE animal_id = ?";
 
-  db.query(sql, [req.params.id], function (error, result) {
-    if (error) {
-      console.log("DB ERROR (DELETE /api/animals/:id):", error);
-      return res.status(500).json({ error: error.message });
+  db.query(sql, [id], function (error, result) {
+    if (error) return next(error);
+
+    if (!result || result.affectedRows === 0) {
+      return next(httpError(404, "Animal not found"));
     }
+
     res.json(result);
   });
 });

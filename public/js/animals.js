@@ -3,14 +3,19 @@ document.addEventListener("DOMContentLoaded", initPage);
 let currentUser = null;
 let animalIdToDelete = null;
 
+/* =========================
+   INIT
+========================= */
 async function initPage() {
   await fetchMe();
 
+  // List page
   if (document.getElementById("animalsGrid")) {
     loadAnimalsList();
     return;
   }
 
+  // Detail page
   if (document.getElementById("detailName")) {
     loadAnimalDetail();
     return;
@@ -18,9 +23,19 @@ async function initPage() {
 }
 
 /* =========================
+   AUTH STATE HELPERS
+========================= */
+function isLoggedIn() {
+  return !!currentUser;
+}
+
+function isAdmin() {
+  return currentUser && currentUser.role === "admin";
+}
+
+/* =========================
    FLASH MESSAGE
 ========================= */
-
 function showFlash(msg) {
   const el = document.getElementById("flash");
   if (!el) {
@@ -34,12 +49,15 @@ function showFlash(msg) {
   window.__flashTimer = setTimeout(() => (el.style.display = "none"), 3500);
 }
 
-function openAdminAccessDialog(){
+/* =========================
+   ADMIN ACCESS DIALOG
+========================= */
+function openAdminAccessDialog() {
   const dlg = document.getElementById("adminAccessDialog");
 
-  // Safety fallback: if the dialog isn't in HTML, use the old banner
+  // If dialog not in this page (detail page), fallback
   if (!dlg) {
-    showFlash("You need admin access to do this.");
+    showFlash("Admin access required.");
     return;
   }
   dlg.showModal();
@@ -50,33 +68,31 @@ function closeAdminAccessDialog() {
   if (dlg) dlg.close();
 }
 
-
 function needAdminMessage() {
   openAdminAccessDialog();
 }
 
-function isAdmin() {
-  return currentUser && currentUser.role === "admin";
-}
-
 /* =========================
-   AUTH
+   AUTH UI
 ========================= */
-
 function openAuthDialog() {
-  document.getElementById("authMsg").textContent = "Login or register.";
-  document.getElementById("authDialog").showModal();
+  const msg = document.getElementById("authMsg");
+  const dlg = document.getElementById("authDialog");
+  if (msg) msg.textContent = "Admin login";
+  if (dlg) dlg.showModal();
 }
 
 async function fetchMe() {
   try {
     const r = await fetch("/api/auth/me");
     const data = await r.json();
-    currentUser = data.user;
+    currentUser = data.user || null;
   } catch {
     currentUser = null;
   }
+
   refreshNav();
+  applyDetailAuthUI();
 }
 
 function refreshNav() {
@@ -84,11 +100,16 @@ function refreshNav() {
   const btnLogout = document.getElementById("btnLogout");
   const navUser = document.getElementById("navUser");
 
+  // Your Add Animal button id is addAnimalBtn
+  const addBtn = document.getElementById("addAnimalBtn");
+
+  // Detail page doesn't have these elements -> just skip
   if (!btnLogin || !btnLogout) return;
 
   if (currentUser) {
     btnLogin.style.display = "none";
     btnLogout.style.display = "inline-flex";
+
     if (navUser) {
       navUser.style.display = "inline-flex";
       navUser.textContent = `${currentUser.name} (${currentUser.role})`;
@@ -98,12 +119,19 @@ function refreshNav() {
     btnLogout.style.display = "none";
     if (navUser) navUser.style.display = "none";
   }
+
+  // Optional: hide Add Animal when not admin (recommended)
+  // If you want to keep it visible and show "admin required" popup when clicked,
+  // comment out the line below.
+  if (addBtn) addBtn.style.display = isAdmin() ? "inline-flex" : "none";
 }
 
 async function login(e) {
   e.preventDefault();
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+
+  const email = document.getElementById("loginEmail")?.value || "";
+  const password = document.getElementById("loginPassword")?.value || "";
+  const msgEl = document.getElementById("authMsg");
 
   const r = await fetch("/api/auth/login", {
     method: "POST",
@@ -112,51 +140,42 @@ async function login(e) {
   });
 
   const data = await r.json().catch(() => ({}));
+
   if (!r.ok) {
-    document.getElementById("authMsg").textContent = data.error || "Login failed";
+    if (msgEl) msgEl.textContent = data.error || "Login failed";
+    else showFlash(data.error || "Login failed");
     return;
   }
 
-  currentUser = data.user;
+  currentUser = data.user || null;
   refreshNav();
-  document.getElementById("authDialog").close();
+
+  document.getElementById("authDialog")?.close();
+
+  // Re-render UI so edit/delete appear now
+  if (document.getElementById("animalsGrid")) loadAnimalsList();
+  applyDetailAuthUI();
 }
 
-async function registerUser(e) {
-  e.preventDefault();
-
-  const name = document.getElementById("regName").value;
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
-  const role = document.getElementById("regRole").value;
-
-  const r = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password, role }),
-  });
-
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    document.getElementById("authMsg").textContent = data.error || "Register failed";
-    return;
-  }
-
-  currentUser = data.user;
-  refreshNav();
-  document.getElementById("authDialog").close();
+// Register is not used anymore, keep as safe no-op so nothing crashes
+function registerUser(e) {
+  if (e) e.preventDefault();
+  showFlash("Registration is disabled. Admin login only.");
 }
 
 async function logout() {
   await fetch("/api/auth/logout", { method: "POST" });
   currentUser = null;
   refreshNav();
+
+  // Re-render UI so edit/delete disappear
+  if (document.getElementById("animalsGrid")) loadAnimalsList();
+  applyDetailAuthUI();
 }
 
 /* =========================
    LIST PAGE
 ========================= */
-
 function loadAnimalsList() {
   fetch("/api/animals", { method: "GET" })
     .then((response) => response.json())
@@ -184,6 +203,9 @@ function renderAnimals(animals) {
     return;
   }
 
+  // ✅ requirement: hide edit/delete if NOT logged in
+  const showActions = isLoggedIn(); // (only admin can login anyway in your backend)
+
   let html = "";
 
   for (let i = 0; i < animals.length; i++) {
@@ -191,12 +213,17 @@ function renderAnimals(animals) {
     const badgeClass = getBadgeClass(a.status);
     const ageText = formatAge(a.age_months);
 
-    // Buttons always visible (your request)
     html += `
       <article class="card">
         <div class="card__media">
           <img src="${a.image_url}" alt="${a.name}" />
-          <button type="button" class="card__close" onclick="deleteAnimal(this)" animalId="${a.animal_id}" aria-label="Delete">×</button>
+
+          ${
+            showActions
+              ? `<button type="button" class="card__close" onclick="deleteAnimal(this)" animalId="${a.animal_id}" aria-label="Delete">×</button>`
+              : ``
+          }
+
           <span class="badge ${badgeClass}">${a.status}</span>
         </div>
 
@@ -207,7 +234,12 @@ function renderAnimals(animals) {
 
           <div class="card__actions">
             <button type="button" class="btn btn--primary" onclick="viewAnimal(this)" animalId="${a.animal_id}">View</button>
-            <button type="button" class="btn btn--ghost" onclick="openEditAnimalDialog(this)" animalId="${a.animal_id}">Edit</button>
+
+            ${
+              showActions
+                ? `<button type="button" class="btn btn--ghost" onclick="openEditAnimalDialog(this)" animalId="${a.animal_id}">Edit</button>`
+                : ``
+            }
           </div>
         </div>
       </article>
@@ -218,16 +250,17 @@ function renderAnimals(animals) {
 }
 
 function viewAnimal(btn) {
-  var id = btn.getAttribute("animalId");
+  const id = btn.getAttribute("animalId");
   location.href = "animal_detail.html?id=" + id;
 }
 
 /* =========================
    DELETE (ADMIN ONLY)
 ========================= */
-
 function deleteAnimal(btn) {
+  // Extra safety: if someone triggers via console
   if (!isAdmin()) return needAdminMessage();
+
   animalIdToDelete = btn.getAttribute("animalId");
   document.getElementById("deleteOverlay").style.display = "flex";
 }
@@ -264,7 +297,6 @@ function confirmDelete() {
 /* =========================
    ADD (ADMIN ONLY)
 ========================= */
-
 function openAddAnimalDialog() {
   if (!isAdmin()) return needAdminMessage();
   document.getElementById("addAnimalDialog").showModal();
@@ -274,8 +306,8 @@ function addAnimalData(event) {
   event.preventDefault();
   if (!isAdmin()) return needAdminMessage();
 
-  var formElement = document.getElementById("addAnimalForm");
-  var formdata = new FormData(formElement);
+  const formElement = document.getElementById("addAnimalForm");
+  const formdata = new FormData(formElement);
 
   fetch("/api/animals", { method: "POST", body: formdata })
     .then(async (response) => {
@@ -298,7 +330,6 @@ function addAnimalData(event) {
 /* =========================
    EDIT (ADMIN ONLY)
 ========================= */
-
 function openEditAnimalDialog(btn) {
   if (!isAdmin()) return needAdminMessage();
 
@@ -346,42 +377,55 @@ function submitEditAnimal(e) {
     })
     .then(() => {
       document.getElementById("editAnimalDialog").close();
-      loadAnimalsList(); // FIXED (was loadAnimal())
+
+      // if list page, refresh list; if detail page, refresh detail
+      if (document.getElementById("animalsGrid")) loadAnimalsList();
+      if (document.getElementById("detailName")) loadAnimalDetail();
     })
     .catch((err) => console.log("Error updating animal:", err));
 }
 
 /* =========================
-   DETAIL PAGE (unchanged)
+   DETAIL PAGE
 ========================= */
-
 function loadAnimalDetail() {
-  var params = new URLSearchParams(location.search);
-  var id = params.get("id");
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
   if (!id) return;
 
   fetch("/api/animals/" + id)
     .then((response) => response.json())
     .then((data) => {
-      var a = Array.isArray(data) ? data[0] : data;
+      const a = Array.isArray(data) ? data[0] : data;
       if (!a) return;
       renderAnimalDetail(a);
+
+      // ✅ requirement: hide edit on detail page if not logged in
+      applyDetailAuthUI();
     })
     .catch((err) => console.log("Error loading animal detail:", err));
+}
+
+function applyDetailAuthUI() {
+  const editLink = document.getElementById("editLink");
+  if (!editLink) return;
+
+  // hide unless logged in (admin)
+  editLink.classList.toggle("btn--invisible", !isLoggedIn());
 }
 
 function renderAnimalDetail(a) {
   setText("crumbName", a.name);
   setText("detailName", a.name);
 
-  var ageText = formatAge(a.age_months);
+  const ageText = formatAge(a.age_months);
   setText("detailSubtitle", `${a.breed} • ${ageText} • ${a.gender}`);
 
-  var badgeClass = getBadgeClass(a.status);
+  const badgeClass = getBadgeClass(a.status);
   setBadge("detailStatusPill", badgeClass, a.status);
   setBadge("detailStatusBadge", badgeClass, a.status);
 
-  var img = document.getElementById("detailImage");
+  const img = document.getElementById("detailImage");
   if (img) {
     img.src = a.image_url;
     img.alt = a.name;
@@ -395,24 +439,24 @@ function renderAnimalDetail(a) {
   setText("quickGender", a.gender);
   setText("quickStatus", a.status);
 
-  var editLink = document.getElementById("editLink");
+  // Set animalId attribute so edit works
+  const editLink = document.getElementById("editLink");
   if (editLink) {
-    var theId = a.animal_id || new URLSearchParams(location.search).get("id");
+    const theId = a.animal_id || new URLSearchParams(location.search).get("id");
     editLink.setAttribute("animalId", theId);
   }
 }
 
 /* =========================
-   HELPERS
+   UI HELPERS
 ========================= */
-
 function setText(id, value) {
-  var el = document.getElementById(id);
+  const el = document.getElementById(id);
   if (el) el.textContent = value ?? "";
 }
 
 function setBadge(id, badgeClass, text) {
-  var el = document.getElementById(id);
+  const el = document.getElementById(id);
   if (!el) return;
   el.classList.remove("badge--available", "badge--reserved", "badge--adopted");
   el.classList.add(badgeClass);

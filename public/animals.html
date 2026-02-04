@@ -20,6 +20,9 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link is-active" href="./animals.html">All Animals</a>
+          <button id="addAnimalBtn" type="button" class="btn btn--primary btn--pill" onclick="openAddAnimalDialog()">
+            + Add Animal
+          </button>
 
           <span id="navUser" class="nav__link" style="display:none;"></span>
 
@@ -31,10 +34,7 @@
             Logout
           </button>
 
-          <!-- Keep visible; JS will block non-admin and show message -->
-          <button type="button" class="btn btn--primary btn--pill" onclick="openAddAnimalDialog()">
-            + Add Animal
-          </button>
+          
         </nav>
       </div>
     </header>
@@ -130,7 +130,7 @@
             <!-- Age -->
             <div>
               <label class="modal__label">AGE (MONTHS)</label>
-              <input name="age_months" type="number" min="0" class="field__control" placeholder="e.g., 18" required />
+              <input name="age_months" type="number" min="1" class="field__control" placeholder="e.g., 18" required />
             </div>
 
             <!-- Status -->
@@ -312,8 +312,7 @@
         <div class="modal__header">
           <div class="modal__headerRow">
             <div>
-              <h2 class="modal__title">Account</h2>
-              <p class="modal__subtitle" id="authMsg">Login or register.</p>
+              <h2 class="modal__title" id="authMsg">Admin login</h2>
             </div>
             <button type="button" class="btn btn--ghost modal__close"
               onclick="document.getElementById('authDialog').close()" aria-label="Close">×</button>
@@ -331,30 +330,6 @@
 
             <div class="modal__actions">
               <button type="submit" class="btn btn--primary btn--pill">Login</button>
-            </div>
-          </form>
-
-          <hr style="margin:16px 0; opacity:.2;" />
-
-          <!-- REGISTER -->
-          <form onsubmit="registerUser(event)">
-            <label class="modal__label">NAME</label>
-            <input id="regName" class="field__control" required />
-
-            <label class="modal__label" style="margin-top:12px;">EMAIL</label>
-            <input id="regEmail" class="field__control" required />
-
-            <label class="modal__label" style="margin-top:12px;">PASSWORD (8+)</label>
-            <input id="regPassword" type="password" class="field__control" required />
-
-            <label class="modal__label" style="margin-top:12px;">ROLE</label>
-            <select id="regRole" class="field__control">
-              <option value="user" selected>user</option>
-              <option value="admin">admin</option>
-            </select>
-
-            <div class="modal__actions">
-              <button type="submit" class="btn btn--ghost btn--pill">Register</button>
             </div>
           </form>
         </div>
@@ -382,12 +357,6 @@
         </div>
       </div>
     </dialog>
-
-
-        
-    
-
-
     <footer class="footer">
       <div class="container footer__inner">
         <span>© AdoptHub</span>

@@ -380,7 +380,11 @@ img{ display:block; max-width:100%; }
   resize: vertical;
 }
 
-/* file input looks nicer */
+.page-detail .btn--invisible{
+  visibility: hidden;
+  pointer-events: none;
+}
+
 
 
 

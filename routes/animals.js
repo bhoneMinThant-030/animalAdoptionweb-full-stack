@@ -3,6 +3,7 @@ var db = require("../db");
 var router = express.Router();
 var path = require("path");
 var multer = require("multer");
+var { requireAdmin } = require("../middleware/auth");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -74,7 +75,7 @@ router.get("/:id", function (req, res) {
 });
 
 // POST /api/animals (create)
-router.post("/", upload.single("image"), function (req, res) {
+router.post("/", requireAdmin, upload.single("image"), function (req, res) {
   // Build image_url from uploaded file
   var image_url = req.file ? "/images/" + req.file.filename : null;
 
@@ -106,7 +107,7 @@ router.post("/", upload.single("image"), function (req, res) {
 
 
 // PUT /api/animals/:id (update)
-router.put("/:id", upload.single("image"), function (req, res) {
+router.put("/:id", requireAdmin, upload.single("image"), function (req, res) {
   const animalId = req.params.id;
 
   // if multer received a file, build the public path
@@ -148,7 +149,7 @@ router.put("/:id", upload.single("image"), function (req, res) {
 });
 
 // DELETE /api/animals/:id
-router.delete("/:id", function (req, res) {
+router.delete("/:id", requireAdmin, function (req, res) {
   var sql = "DELETE FROM animals WHERE animal_id = ?";
 
   db.query(sql, [req.params.id], function (error, result) {

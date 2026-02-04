@@ -6,10 +6,10 @@
     <title>AdoptHub • All Animals</title>
     <link rel="stylesheet" href="./css/style.css" />
     <link rel="stylesheet" href="./css/modal-form.css" />
-    <script src="./js/animals.js"></script>
+    <script src="./js/animals.js" defer></script>
   </head>
 
-  <body onload="loadAnimalsList()">
+  <body>
     <!-- NAV -->
     <header class="nav">
       <div class="container nav__inner">
@@ -20,10 +20,21 @@
 
         <nav class="nav__links" aria-label="Primary">
           <a class="nav__link is-active" href="./animals.html">All Animals</a>
+
+          <span id="navUser" class="nav__link" style="display:none;"></span>
+
+          <button type="button" id="btnLogin" class="btn btn--ghost btn--pill" onclick="openAuthDialog()">
+            Login
+          </button>
+
+          <button type="button" id="btnLogout" class="btn btn--ghost btn--pill" style="display:none;" onclick="logout()">
+            Logout
+          </button>
+
+          <!-- Keep visible; JS will block non-admin and show message -->
           <button type="button" class="btn btn--primary btn--pill" onclick="openAddAnimalDialog()">
             + Add Animal
           </button>
-
         </nav>
       </div>
     </header>
@@ -35,6 +46,9 @@
         <p class="hero__subtitle">Browse available animals</p>
       </div>
     </section>
+    <div id="flash" role="alert" aria-live="polite"
+     style="display:none; margin:12px auto; max-width:1100px; padding:12px 16px; border-radius:12px; background:#fff3cd;">
+    </div>
 
     <!-- CONTENT -->
     <main class="content">
@@ -293,6 +307,83 @@
         </form>
       </div>
     </dialog>
+    <dialog id="authDialog" class="modal">
+      <div class="modal__panel card">
+        <div class="modal__header">
+          <div class="modal__headerRow">
+            <div>
+              <h2 class="modal__title">Account</h2>
+              <p class="modal__subtitle" id="authMsg">Login or register.</p>
+            </div>
+            <button type="button" class="btn btn--ghost modal__close"
+              onclick="document.getElementById('authDialog').close()" aria-label="Close">×</button>
+          </div>
+        </div>
+
+        <div class="modal__body">
+          <!-- LOGIN -->
+          <form onsubmit="login(event)">
+            <label class="modal__label">EMAIL</label>
+            <input id="loginEmail" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">PASSWORD</label>
+            <input id="loginPassword" type="password" class="field__control" required />
+
+            <div class="modal__actions">
+              <button type="submit" class="btn btn--primary btn--pill">Login</button>
+            </div>
+          </form>
+
+          <hr style="margin:16px 0; opacity:.2;" />
+
+          <!-- REGISTER -->
+          <form onsubmit="registerUser(event)">
+            <label class="modal__label">NAME</label>
+            <input id="regName" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">EMAIL</label>
+            <input id="regEmail" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">PASSWORD (8+)</label>
+            <input id="regPassword" type="password" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">ROLE</label>
+            <select id="regRole" class="field__control">
+              <option value="user" selected>user</option>
+              <option value="admin">admin</option>
+            </select>
+
+            <div class="modal__actions">
+              <button type="submit" class="btn btn--ghost btn--pill">Register</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    <!-- Admin Access Modal -->
+    <dialog id="adminAccessDialog" class="modal">
+      <div class="modal__panel card">
+        <div class="modal__header">
+          <div class="modal__headerRow">
+            <h2 class="modal__title">Admin Access Required</h2>
+          </div>
+        </div>
+
+        <div class="modal__body">
+          <div class="modal__actions">
+            <button
+              type="button"
+              class="btn btn--primary btn--pill"
+              onclick="closeAdminAccessDialog()"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+
         
     
 

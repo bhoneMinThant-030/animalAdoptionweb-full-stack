@@ -104,9 +104,44 @@
   flex: 1;
 }
 
+#adminAccessDialog .modal__header{
+  padding: 16px 18px 12px;
+}
+
+#adminAccessDialog .modal__body{
+  padding: 14px 18px 18px;
+}
+
+#adminAccessDialog .modal__actions{
+  margin-top: 10px;
+}
+
+
+#adminAccessDialog.modal{
+  margin: auto;              
+  position: fixed;           
+  top: 50%;
+  left: 50%;
+  transform: translate(-35%, -75%);
+}
+
+
+#adminAccessDialog .modal__panel.card{
+  display:flex;
+  flex-direction: column;
+  max-width: 450px;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
 /* Responsive */
 @media (max-width: 620px){
   .modal__grid{
     grid-template-columns: 1fr;
   }
 }
+
+/* Make Admin modal shorter */

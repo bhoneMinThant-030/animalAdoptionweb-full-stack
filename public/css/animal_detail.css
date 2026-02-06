@@ -58,11 +58,8 @@ img{ display:block; max-width:100%; }
   gap: 12px;
 }
 .brand__mark{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--primary), #18c0b2);
-  box-shadow: 0 10px 20px rgba(8,168,154,.18);
+  width: 70px;
+  height: 60px;
 }
 .brand__name{
   font-weight: 800;

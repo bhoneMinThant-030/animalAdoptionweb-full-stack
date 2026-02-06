@@ -36,6 +36,11 @@ function isAdmin() {
 /* =========================
    FLASH MESSAGE
 ========================= */
+
+function showAlert(msg) {
+  alert(msg);
+}
+
 function showFlash(msg) {
   const el = document.getElementById("flash");
   if (!el) {
@@ -315,7 +320,7 @@ function addAnimalData(event) {
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) needAdminMessage();
-        else showFlash(data.error || "Create failed");
+        else showAlert(data.error || "Create failed");
         throw new Error("POST failed");
       }
       return data;
@@ -370,7 +375,7 @@ function submitEditAnimal(e) {
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) needAdminMessage();
-        else showFlash(data.error || "Update failed");
+        else showAlert(data.error || "Update failed");
         throw new Error("PUT failed");
       }
       return data;

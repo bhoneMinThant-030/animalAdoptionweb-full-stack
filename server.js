@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
       status = 413;
       message = "Each image must be 5MB or smaller";
     } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
-      message = "You can upload up to 3 images";
+      message = "You must upload up to 3 images";
     } else {
       message = "File upload error";
     }

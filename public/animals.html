@@ -145,7 +145,7 @@
             <!-- File -->
             <div class="modal__full">
               <label class="modal__label">IMAGE</label>
-              <input type="file" name="image" accept="image/*" class="field__control modal__file" multiple required />
+              <input type="file" name="images" accept="image/*" multiple class="field__control modal__file" required />
             </div>
 
             <!-- Temperament -->
@@ -266,14 +266,8 @@
             <!-- File -->
             <div class="modal__full">
               <label class="modal__label">NEW IMAGE (OPTIONAL)</label>
-              <input
-                name="image"
-                id="edit_image"
-                type="file"
-                accept="image/*"
-                class="field__control modal__file" multiple
-              />
-              <div class="modal__hint">Leave empty to keep the current image.</div>
+              <input name="images" id="edit_images" type="file" accept="image/*" multiple class="field__control modal__file" />
+              <div class="modal__hint">Upload exactly 3 images to replace current ones. Leave empty to keep existing.</div>
             </div>
 
             <!-- Temperament -->

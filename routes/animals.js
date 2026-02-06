@@ -30,7 +30,8 @@ function validateEnum(value, allowed) {
 }
 
 /* =========================
-   Multer (1–3 images)
+   Multer (up to 3 images)
+   NOTE: We enforce exact count in routes.
 ========================= */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -44,7 +45,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB each
   fileFilter: function (req, file, cb) {
     if (file.mimetype && file.mimetype.startsWith("image/")) cb(null, true);
     else cb(new Error("Only image files allowed"));
@@ -109,7 +110,7 @@ router.get("/:id", (req, res, next) => {
 
 /* =========================
    POST /api/animals  (admin)
-   No transaction version
+   RULE: must upload EXACTLY 3 images
 ========================= */
 router.post("/", requireAdmin, upload.array("image", 3), (req, res, next) => {
   const name = cleanText(req.body.name);
@@ -134,8 +135,11 @@ router.post("/", requireAdmin, upload.array("image", 3), (req, res, next) => {
   if (!validateEnum(status, ["Available", "Reserved", "Adopted"])) return next(httpError(400, "Invalid status"));
 
   const files = req.files || [];
-  if (!files.length) return next(httpError(400, "At least 1 image is required"));
-  if (files.length > 3) return next(httpError(400, "You can upload up to 3 images"));
+
+  // ✅ REQUIRED: exactly 3
+  if (files.length !== 3) {
+    return next(httpError(400, "You must upload exactly 3 images"));
+  }
 
   const imageUrls = files.map((f) => "/images/" + f.filename);
   const coverUrl = imageUrls[0];
@@ -166,8 +170,9 @@ router.post("/", requireAdmin, upload.array("image", 3), (req, res, next) => {
 
 /* =========================
    PUT /api/animals/:id (admin)
-   If new images uploaded -> replace images
-   No transaction version
+   RULE:
+   - 0 images uploaded -> keep existing images
+   - if uploading new images -> MUST upload EXACTLY 3
 ========================= */
 router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
   const id = parsePositiveInt(req.params.id);
@@ -195,10 +200,15 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
   if (!validateEnum(status, ["Available", "Reserved", "Adopted"])) return next(httpError(400, "Invalid status"));
 
   const files = req.files || [];
-  if (files.length > 3) return next(httpError(400, "You can upload up to 3 images"));
+  const hasNewImages = files.length > 0;
+
+  // ✅ If they are trying to upload new images, enforce exactly 3
+  if (hasNewImages && files.length !== 3) {
+    return next(httpError(400, "To replace images, you must upload exactly 3 images"));
+  }
 
   const imageUrls = files.map((f) => "/images/" + f.filename);
-  const newCoverUrl = imageUrls.length ? imageUrls[0] : null;
+  const newCoverUrl = hasNewImages ? imageUrls[0] : null;
 
   const updateSql = `
     UPDATE animals
@@ -220,8 +230,8 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
     if (err1) return next(err1);
     if (!result1 || result1.affectedRows === 0) return next(httpError(404, "Animal not found"));
 
-    // No new images => done
-    if (!imageUrls.length) return res.json({ success: true });
+    // ✅ No new images => done (keep existing)
+    if (!hasNewImages) return res.json({ success: true, images_replaced: false });
 
     // Replace images (delete then insert)
     db.query("DELETE FROM animal_images WHERE animal_id = ?", [id], (err2) => {
@@ -233,7 +243,7 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
         [rows],
         (err3) => {
           if (err3) return next(err3);
-          res.json({ success: true });
+          res.json({ success: true, images_replaced: true });
         }
       );
     });
@@ -242,7 +252,7 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
 
 /* =========================
    DELETE /api/animals/:id (admin)
-   ✅ short because ON DELETE CASCADE handles animal_images
+   ON DELETE CASCADE handles animal_images automatically
 ========================= */
 router.delete("/:id", requireAdmin, (req, res, next) => {
   const id = parsePositiveInt(req.params.id);

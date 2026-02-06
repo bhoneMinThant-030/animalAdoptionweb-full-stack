@@ -425,11 +425,7 @@ function renderAnimalDetail(a) {
   setBadge("detailStatusPill", badgeClass, a.status);
   setBadge("detailStatusBadge", badgeClass, a.status);
 
-  const img = document.getElementById("detailImage");
-  if (img) {
-    img.src = a.image_url;
-    img.alt = a.name;
-  }
+  renderDetailImages(a);
 
   setText("detailTemperament", a.temperament || "");
 
@@ -446,6 +442,49 @@ function renderAnimalDetail(a) {
     editLink.setAttribute("animalId", theId);
   }
 }
+
+function renderDetailImages(a) {
+  const mainImg = document.getElementById("detailImage");
+  const thumbs = document.getElementById("detailThumbs");
+
+  // Build list of images from API
+  // Priority: a.images (from JOIN) -> fallback to a.image_url
+  let images = [];
+  if (Array.isArray(a.images) && a.images.length) {
+    images = a.images.filter(Boolean);
+  } else if (a.image_url) {
+    images = [a.image_url];
+  }
+
+  // Main image
+  if (mainImg) {
+    mainImg.src = images[0] || a.image_url || "";
+    mainImg.alt = a.name || "";
+  }
+
+  // Thumbnails (up to 3), no click logic
+  if (!thumbs) return;
+
+  // If only 1 image, you can hide thumbs (cleaner)
+  if (images.length <= 1) {
+    thumbs.innerHTML = "";
+    thumbs.style.display = "none";
+    return;
+  }
+
+  thumbs.style.display = "flex";
+  thumbs.innerHTML = "";
+
+  const maxThumbs = Math.min(images.length, 3);
+  for (let i = 0; i < maxThumbs; i++) {
+    const t = document.createElement("img");
+    t.src = images[i];
+    t.alt = `${a.name || "Animal"} image ${i + 1}`;
+    thumbs.appendChild(t);
+  }
+}
+
+
 
 /* =========================
    UI HELPERS

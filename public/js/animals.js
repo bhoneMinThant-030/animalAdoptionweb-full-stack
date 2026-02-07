@@ -81,9 +81,7 @@ function needAdminMessage() {
    AUTH UI
 ========================= */
 function openAuthDialog() {
-  const msg = document.getElementById("authMsg");
   const dlg = document.getElementById("authDialog");
-  if (msg) msg.textContent = "Admin login";
   if (dlg) dlg.showModal();
 }
 
@@ -163,9 +161,29 @@ async function login(e) {
 }
 
 // Register is not used anymore, keep as safe no-op so nothing crashes
-function registerUser(e) {
-  if (e) e.preventDefault();
-  showFlash("Registration is disabled. Admin login only.");
+async function registerUser(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("regName").value;
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+  const role = document.getElementById("regRole").value;
+
+  const r = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, role }),
+  });
+
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    document.getElementById("authMsg").textContent = data.error || "Register failed";
+    return;
+  }
+
+  currentUser = data.user;
+  refreshNav();
+  document.getElementById("authDialog").close();
 }
 
 async function logout() {

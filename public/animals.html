@@ -27,7 +27,7 @@
           <span id="navUser" class="nav__link" style="display:none;"></span>
 
           <button type="button" id="btnLogin" class="btn btn--ghost btn--pill" onclick="openAuthDialog()">
-            Login
+            Login/Sign up
           </button>
 
           <button type="button" id="btnLogout" class="btn btn--ghost btn--pill" style="display:none;" onclick="logout()">
@@ -146,6 +146,7 @@
             <div class="modal__full">
               <label class="modal__label">IMAGE</label>
               <input type="file" name="images" accept="image/*" multiple class="field__control modal__file" required />
+              <div class="modal__hint">Upload exactly 3 images.</div>
             </div>
 
             <!-- Temperament -->
@@ -305,7 +306,8 @@
         <div class="modal__header">
           <div class="modal__headerRow">
             <div>
-              <h2 class="modal__title" id="authMsg">Admin login</h2>
+              <h2>Login or Register</h2>
+              <p class="modal__title" id="authMsg" style="font-size: 12px; color: red;"></p>
             </div>
             <button type="button" class="btn btn--ghost modal__close"
               onclick="document.getElementById('authDialog').close()" aria-label="Close">×</button>
@@ -323,6 +325,26 @@
 
             <div class="modal__actions">
               <button type="submit" class="btn btn--primary btn--pill">Login</button>
+            </div>
+          </form>
+          <form onsubmit="registerUser(event)">
+            <label class="modal__label">NAME</label>
+            <input id="regName" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">EMAIL</label>
+            <input id="regEmail" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">PASSWORD (8+)</label>
+            <input id="regPassword" type="password" class="field__control" required />
+
+            <label class="modal__label" style="margin-top:12px;">ROLE</label>
+            <select id="regRole" class="field__control">
+              <option value="user" selected>user</option>
+              <option value="admin">admin</option>
+            </select>
+
+            <div class="modal__actions">
+              <button type="submit" class="btn btn--primary btn--pill">Register</button>
             </div>
           </form>
         </div>

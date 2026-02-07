@@ -6,8 +6,9 @@
   <title>AdoptHub • Animal Details</title>
 
   <script src="./js/animals.js" defer></script>
-  <link rel="stylesheet" href="css/modal-form.css" />
   <link rel="stylesheet" href="css/animal_detail.css" />
+  <link rel="stylesheet" href="css/modal-form.css" />
+  
   
 </head>
 
@@ -252,6 +253,27 @@
             </button>
           </div>
         </form>
+      </div>
+    </dialog>
+    <dialog id="adminAccessDialog" class="modal">
+      <div class="modal__panel card">
+        <div class="modal__header">
+          <div class="modal__headerRow">
+            <h2 class="modal__title">Admin Access Required</h2>
+          </div>
+        </div>
+
+        <div class="modal__body">
+          <div class="modal__actions">
+            <button
+              type="button"
+              class="btn btn--primary btn--pill"
+              onclick="closeAdminAccessDialog()"
+            >
+              OK
+            </button>
+          </div>
+        </div>
       </div>
     </dialog>
   </main>

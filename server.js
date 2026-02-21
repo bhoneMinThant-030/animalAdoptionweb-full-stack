@@ -5,7 +5,6 @@ const MySQLStoreFactory = require("express-mysql-session");
 
 const animalsRouter = require("./routes/animals");
 const authRouter = require("./routes/auth");
-
 const app = express();
 
 function httpError(statusCode, message) {

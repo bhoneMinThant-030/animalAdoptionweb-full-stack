@@ -1,7 +1,4 @@
-/* =========================================
-   modal-form.css (shared for Add + Edit)
-   Depends on your existing variables + .btn + .card + .field__control
-   ========================================= */
+
 
 .modal{
   padding: 0;
@@ -16,7 +13,7 @@
 }
 
 .modal__panel{
-  padding: 0; /* card already has background/border/radius from your main CSS */
+  padding: 0; 
 }
 
 /* Header */
@@ -93,7 +90,6 @@
   font-size: 13px;
 }
 
-/* Actions */
 .modal__actions{
   display:flex;
   gap: 12px;
@@ -134,14 +130,3 @@
   align-items: center;
 }
 
-
-
-
-/* Responsive */
-@media (max-width: 620px){
-  .modal__grid{
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Make Admin modal shorter */

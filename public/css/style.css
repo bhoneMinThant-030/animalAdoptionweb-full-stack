@@ -77,7 +77,7 @@ img{ display:block; max-width:100%; }
   color: #0f172a;
 }
 
-/* HERO */
+
 .hero{
   position: relative;
   padding: 64px 0 42px;
@@ -148,7 +148,7 @@ img{ display:block; max-width:100%; }
 }
 .field__control::placeholder{ color:#94a3b8; }
 
-/* BUTTONS */
+
 .btn{
   display:inline-flex;
   align-items:center;
@@ -182,7 +182,7 @@ img{ display:block; max-width:100%; }
   border-color:#eaecef;
 }
 
-/* CONTENT */
+
 .content{ padding: 20px 0 70px; }
 .meta{
   margin: 22px 0 18px;
@@ -190,7 +190,7 @@ img{ display:block; max-width:100%; }
   font-weight: 600;
 }
 
-/* GRID + CARD */
+
 .grid{
   display:grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -207,14 +207,14 @@ img{ display:block; max-width:100%; }
   position: relative;
 }
 
-/* Enhanced hover effect */
+
 .grid .card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(8, 168, 154, 0.15), 0 0 0 1px rgba(8, 168, 154, 0.1);
   border-color: rgba(8, 168, 154, 0.2);
 }
 
-/* Smooth image zoom on hover */
+
 .card__media{
   position:relative;
   height: 210px;
@@ -233,7 +233,7 @@ img{ display:block; max-width:100%; }
   transform: scale(1.08);
 }
 
-/* Animate badge on hover */
+
 .badge{
   position:absolute;
   right: 14px;
@@ -255,7 +255,7 @@ img{ display:block; max-width:100%; }
 .badge--reserved{ background: var(--reserved); }
 .badge--adopted{ background: var(--adopted); }
 
-/* Close button enhancement */
+
 .card__close{
   position: absolute;
   top: 12px;
@@ -286,7 +286,7 @@ img{ display:block; max-width:100%; }
   box-shadow: 0 8px 18px rgba(185, 28, 28, 0.25);
 }
 
-/* Card body */
+
 .card__body{ 
   padding: 18px 18px 16px;
   transition: padding 0.3s ease;
@@ -344,7 +344,7 @@ img{ display:block; max-width:100%; }
   min-height: 44px;
 }
 
-/* Enhanced button animations */
+
 .card__actions{
   display:flex;
   gap: 12px;
@@ -360,7 +360,7 @@ img{ display:block; max-width:100%; }
   overflow: hidden;
 }
 
-/* Ripple effect on buttons */
+
 .card__actions .btn::before {
   content: '';
   position: absolute;
@@ -388,7 +388,7 @@ img{ display:block; max-width:100%; }
   transform: translateY(0);
 }
 
-/* Stagger animation for buttons on card hover */
+
 .card:hover .card__actions .btn:nth-child(1) {
   transition-delay: 0.05s;
 }
@@ -397,7 +397,7 @@ img{ display:block; max-width:100%; }
   transition-delay: 0.1s;
 }
 
-/* Add subtle shine effect on hover */
+
 .card::before {
   content: '';
   position: absolute;
@@ -420,7 +420,7 @@ img{ display:block; max-width:100%; }
   left: 100%;
 }
 
-/* FOOTER */
+
 .footer{
   padding: 26px 0 40px;
   color: #64748b;
@@ -493,12 +493,12 @@ img{ display:block; max-width:100%; }
 }
 
 .btn--delete {
-  background-color: #17a2b8;  /* Matches your teal theme */
+  background-color: #17a2b8;  
   color: white;
 }
 
 .btn--delete:hover {
-  background-color: #138496;  /* Darker teal on hover */
+  background-color: #138496;  
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
 }

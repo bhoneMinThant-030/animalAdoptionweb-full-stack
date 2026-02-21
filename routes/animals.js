@@ -31,7 +31,6 @@ function validateEnum(value, allowed) {
 
 /* =========================
    Multer (up to 3 images)
-   NOTE: We enforce exact count in routes.
 ========================= */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -72,7 +71,6 @@ router.get("/", (req, res, next) => {
 
 /* =========================
    GET /api/animals/:id  (JOIN)
-   Returns [row] for your existing frontend
 ========================= */
 router.get("/:id", (req, res, next) => {
   const id = parsePositiveInt(req.params.id);
@@ -127,7 +125,7 @@ router.post("/", requireAdmin, upload.array("image", 3), (req, res, next) => {
   if (!breed) return next(httpError(400, "Breed is required"));
   if (!temperament) return next(httpError(400, "Temperament is required"));
 
-  if (!Number.isInteger(age_months) || age_months < 0) {
+  if (!Number.isInteger(age_months) || age_months <= 0) {
     return next(httpError(400, "age_months must be an integer >= 0"));
   }
 
@@ -192,7 +190,7 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
   if (!breed) return next(httpError(400, "Breed is required"));
   if (!temperament) return next(httpError(400, "Temperament is required"));
 
-  if (!Number.isInteger(age_months) || age_months < 0) {
+  if (!Number.isInteger(age_months) || age_months <= 0) {
     return next(httpError(400, "age_months must be an integer >= 0"));
   }
 
@@ -230,10 +228,9 @@ router.put("/:id", requireAdmin, upload.array("image", 3), (req, res, next) => {
     if (err1) return next(err1);
     if (!result1 || result1.affectedRows === 0) return next(httpError(404, "Animal not found"));
 
-    // ✅ No new images => done (keep existing)
+    
     if (!hasNewImages) return res.json({ success: true, images_replaced: false });
 
-    // Replace images (delete then insert)
     db.query("DELETE FROM animal_images WHERE animal_id = ?", [id], (err2) => {
       if (err2) return next(err2);
 

@@ -33,48 +33,31 @@ function isAdmin() {
   return currentUser && currentUser.role === "admin";
 }
 
-/* =========================
-   FLASH MESSAGE
-========================= */
+
 
 function showAlert(msg) {
   alert(msg);
 }
 
-function showFlash(msg) {
-  const el = document.getElementById("flash");
-  if (!el) {
-    alert(msg);
-    return;
-  }
-  el.textContent = msg;
-  el.style.display = "block";
 
-  clearTimeout(window.__flashTimer);
-  window.__flashTimer = setTimeout(() => (el.style.display = "none"), 3500);
-}
 
 /* =========================
    ADMIN ACCESS DIALOG
 ========================= */
-function openAdminAccessDialog() {
-  const dlg = document.getElementById("adminAccessDialog");
-
-  // If dialog not in this page (detail page), fallback
-  if (!dlg) {
-    showFlash("Admin access required.");
-    return;
-  }
-  dlg.showModal();
-}
-
 function closeAdminAccessDialog() {
   const dlg = document.getElementById("adminAccessDialog");
   if (dlg) dlg.close();
 }
 
 function needAdminMessage() {
-  openAdminAccessDialog();
+  const dlg = document.getElementById("adminAccessDialog");
+
+  
+  if (!dlg) {
+    showAlert("Admin access required.");
+    return;
+  }
+  dlg.showModal();
 }
 
 /* =========================
@@ -103,10 +86,10 @@ function refreshNav() {
   const btnLogout = document.getElementById("btnLogout");
   const navUser = document.getElementById("navUser");
 
-  // Your Add Animal button id is addAnimalBtn
+  
   const addBtn = document.getElementById("addAnimalBtn");
 
-  // Detail page doesn't have these elements -> just skip
+  
   if (!btnLogin || !btnLogout) return;
 
   if (currentUser) {
@@ -123,9 +106,6 @@ function refreshNav() {
     if (navUser) navUser.style.display = "none";
   }
 
-  // Optional: hide Add Animal when not admin (recommended)
-  // If you want to keep it visible and show "admin required" popup when clicked,
-  // comment out the line below.
   if (addBtn) addBtn.style.display = isAdmin() ? "inline-flex" : "none";
 }
 
@@ -155,12 +135,11 @@ async function login(e) {
 
   document.getElementById("authDialog")?.close();
 
-  // Re-render UI so edit/delete appear now
   if (document.getElementById("animalsGrid")) loadAnimalsList();
   applyDetailAuthUI();
 }
 
-// Register is not used anymore, keep as safe no-op so nothing crashes
+
 async function registerUser(e) {
   e.preventDefault();
 
@@ -191,7 +170,6 @@ async function logout() {
   currentUser = null;
   refreshNav();
 
-  // Re-render UI so edit/delete disappear
   if (document.getElementById("animalsGrid")) loadAnimalsList();
   applyDetailAuthUI();
 }
@@ -226,8 +204,8 @@ function renderAnimals(animals) {
     return;
   }
 
-  // ✅ requirement: hide edit/delete if NOT logged in
-  const showActions = isLoggedIn(); // (only admin can login anyway in your backend)
+
+  const showActions = isLoggedIn(); // 
 
   let html = "";
 
@@ -281,7 +259,7 @@ function viewAnimal(btn) {
    DELETE (ADMIN ONLY)
 ========================= */
 function deleteAnimal(btn) {
-  // Extra safety: if someone triggers via console
+
   if (!isAdmin()) return needAdminMessage();
 
   animalIdToDelete = btn.getAttribute("animalId");
@@ -302,7 +280,7 @@ function confirmDelete() {
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) needAdminMessage();
-        else showFlash(data.error || "Delete failed");
+        else showAlert(data.error || "Delete failed");
         throw new Error("DELETE failed");
       }
       return data;
@@ -458,7 +436,7 @@ function renderAnimalDetail(a) {
   setText("quickGender", a.gender);
   setText("quickStatus", a.status);
 
-  // Set animalId attribute so edit works
+
   const editLink = document.getElementById("editLink");
   if (editLink) {
     const theId = a.animal_id || new URLSearchParams(location.search).get("id");
@@ -470,8 +448,6 @@ function renderDetailImages(a) {
   const mainImg = document.getElementById("detailImage");
   const thumbs = document.getElementById("detailThumbs");
 
-  // Build list of images from API
-  // Priority: a.images (from JOIN) -> fallback to a.image_url
   let images = [];
   if (Array.isArray(a.images) && a.images.length) {
     images = a.images.filter(Boolean);
@@ -479,16 +455,15 @@ function renderDetailImages(a) {
     images = [a.image_url];
   }
 
-  // Main image
   if (mainImg) {
     mainImg.src = images[0] || a.image_url || "";
     mainImg.alt = a.name || "";
   }
 
-  // Thumbnails (up to 3), no click logic
+  
   if (!thumbs) return;
 
-  // If only 1 image, you can hide thumbs (cleaner)
+
   if (images.length <= 1) {
     thumbs.innerHTML = "";
     thumbs.style.display = "none";

@@ -55,7 +55,7 @@ router.post("/register", (req, res, next) => {
 });
 
 
-// POST /api/auth/login  (ADMIN ONLY)
+// POST /api/auth/login  
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body || {};
   if (!email || !password) return next(httpError(400, "Missing fields"));
